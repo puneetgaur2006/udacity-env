@@ -1,53 +1,151 @@
-# UdaPlay - AI Game Research Agent Project
+# Udaplay: AI Research Agent for Video Games
 
-## Project Overview
-UdaPlay is an AI-powered research agent for the video game industry. This project is divided into two main parts that will help you build a sophisticated AI agent capable of answering questions about video games using both local knowledge and web searches.
+An intelligent agent that answers questions about the video game industry using internal knowledge (RAG) and web search fallback.
+
+## Overview
+
+Udaplay is built as part of the Udacity AI Agent course. It demonstrates:
+- Retrieval-Augmented Generation (RAG) using ChromaDB vector database
+- LLM-powered evaluation of retrieved documents
+- Web search integration with Tavily API
+- State machine-based agent workflow
+- Structured output reporting
+
+## Features
+
+- **Semantic Search**: Queries ChromaDB for relevant game information
+- **Intelligent Evaluation**: Uses Ollama/Mistral to assess if retrieved data answers the question
+- **Web Fallback**: Automatically searches the web when internal knowledge is insufficient
+- **Structured Reports**: Provides detailed query reports with sources and evaluation results
+- **Conversation History**: Maintains history of interactions
+
+## Architecture
+
+### Tools
+- `retrieve_game()`: Semantic search in ChromaDB collection
+- `evaluate_retrieval_tool()`: LLM-based evaluation of document usefulness
+- `web_search_tool()`: Web search using Tavily API
+
+### Agent States
+1. **RETRIEVE**: Get relevant games from vector DB
+2. **EVALUATE**: Check if results are useful for the question
+3. **WEB**: Fallback to web search if evaluation fails
+4. **ANSWER**: Generate final response from available data
+
+## Setup
+
+### Prerequisites
+- Python 3.8+
+- Ollama (for Mistral model)
+- ChromaDB vector database
+- API keys for OpenAI and Tavily
+
+### Installation
+
+1. **Clone/Setup Project**:
+   ```bash
+   cd udacity_right_env/Code/project/starter
+   ```
+
+2. **Install Dependencies**:
+   ```bash
+   pip install -r requirements.txt  # If exists, or manually install:
+   pip install chromadb ollama tavily-python python-dotenv
+   ```
+
+3. **Environment Variables**:
+   Create `.env` file:
+   ```
+   OPENAI_API_KEY=your_openai_key
+   TAVILY_API_KEY=your_tavily_key
+   ```
+
+4. **Setup ChromaDB**:
+   - Ensure `chromadb/` directory exists with populated collection
+   - Collection name: `udaplay`
+
+5. **Start Ollama**:
+   ```bash
+   ollama serve
+   ollama pull mistral
+   ```
+
+## Usage
+
+### Basic Query
+```python
+from udaplay_agent import UdaPlayAgent
+
+agent = UdaPlayAgent()
+result = agent.query("When was Pokémon Gold released?")
+agent.print_report(result)
+```
+
+### Example Queries
+- "When was GTA launched?"
+- "When was Pokémon Gold and Silver released?"
+- "When was Tekken 7 released?"
+- "Was Mortal Kombat X released for PlayStation 5?"
+- "Which one was the first 3D platformer Mario game?"
 
 ## Project Structure
 
-### Part 1: Offline RAG (Retrieval-Augmented Generation)
-In this part, you'll build a Vector Database using ChromaDB to store and retrieve video game information efficiently.
-
-Key tasks:
-- Set up ChromaDB as a persistent client
-- Create a collection with appropriate embedding functions
-- Process and index game data from JSON files
-- Each game document contains:
-  - Name
-  - Platform
-  - Genre
-  - Publisher
-  - Description
-  - Year of Release
-
-### Part 2: AI Agent Development
-Build an intelligent agent that combines local knowledge with web search capabilities.
-
-The agent will have the following capabilities:
-1. Answer questions using internal knowledge (RAG)
-2. Search the web when needed
-3. Maintain conversation state
-4. Return structured outputs
-5. Store useful information for future use
-
-Required Tools to Implement:
-1. `retrieve_game`: Search the vector database for game information
-2. `evaluate_retrieval`: Assess the quality of retrieved results
-3. `game_web_search`: Perform web searches for additional information
-
-## Requirements
-
-### Environment Setup
-Create a `.env` file with the following API keys:
 ```
-OPENAI_API_KEY="YOUR_KEY"
-CHROMA_OPENAI_API_KEY="YOUR_KEY"
-TAVILY_API_KEY="YOUR_KEY"
+udacity_right_env/Code/project/starter/
+├── Udaplay_02_starter_project.ipynb  # Main implementation
+├── chromadb/                         # Vector database
+├── .env                              # Environment variables
+└── README.md                         # This file
 ```
 
-### Project Dependencies
-- Python 3.11+
-- ChromaDB
+## Key Components
+
+### Vector Database Setup
+- Uses ChromaDB for persistent storage
+- Game metadata includes: Name, Platform, YearOfRelease, Description
+- Semantic search with embeddings
+
+### Evaluation Logic
+- Prompts Mistral to evaluate document relevance
+- Returns JSON with `useful` boolean and `reason` string
+- Handles parsing errors gracefully
+
+### Web Search Integration
+- Tavily API for reliable search results
+- Extracts titles, content snippets, and URLs
+- Limits to 3 results for efficiency
+
+## Troubleshooting
+
+### Common Issues
+- **Ollama not responding**: Ensure `ollama serve` is running and `mistral` model is pulled
+- **ChromaDB errors**: Check `chromadb/` directory exists and collection is populated
+- **API key errors**: Verify `.env` file has correct keys
+- **TypeError in generate_answer**: Ensure data types match (dict for internal, list for web)
+
+### Debug Tips
+- Test individual tools first:
+  ```python
+  games = retrieve_game("Pokémon")
+  print(games)
+  ```
+- Check evaluation:
+  ```python
+  eval_result = evaluate_retrieval_tool("question", games[0])
+  print(eval_result)
+  ```
+
+## Future Enhancements
+
+- Add long-term memory persistence
+- Implement more sophisticated evaluation prompts
+- Add support for multiple vector collections
+- Integrate with additional APIs (Steam, IGDB, etc.)
+- Add conversation context awareness
+
+## License
+
+This project is part of Udacity coursework. See LICENSE.md for details.
 - OpenAI
 - Tavily
 - dotenv
